@@ -137,6 +137,10 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
         accept-and-menu-complete)
           eval "$event() { builtin zle .$event && _zsh_highlight } ; zle -N $event"
           ;;
+        # The following widgets should NOT remove any previously applied highlighting
+        # Therefore we do not remap them
+        (.forward-char|.backward-char|.up-line-or-history|.down-line-or-history))
+          ;;
         .*)
           clean_event=$event[2,${#event}] # Remove the leading dot in the event name
           case ${widgets[$clean_event]-} in
@@ -155,25 +159,6 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
   unset event clean_event
 
   #-------------->8------------------->8------------------->8----------------#
-
-  # redefine forward-char, backward-char, up-line-or-history and down-line-or-history, 
-  # so that they do not remove any previously applied highlighting
-
-  function forward-char () { 
-    zle .forward-char
-  }
-
-  function backward-char () { 
-    zle .backward-char
-  }
-
-  function up-line-or-history () { 
-    zle .up-line-or-history
-  }
-
-  function down-line-or-history () {
-    zle .down-line-or-history
-  }
 
 fi
 
