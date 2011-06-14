@@ -62,6 +62,62 @@
 setopt extendedglob
 zmodload -F zsh/parameter
 
+# We have to "override" some keys and widgets, unless
+# this has been done already by zsh-syntax-highlighting
+# (https://github.com/nicoulaj/zsh-syntax-highlighting)
+
+if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
+  function ordinary-key-press() {
+    if [[ $KEYS = [[:print:]] ]]; then
+      region_highlight=()
+    fi
+    zle .self-insert
+  }
+  # Override any ordinary key press so that any
+  # previously applied highlighting is removed:
+  zle -N self-insert ordinary-key-press
+
+  # The next bit overrides any existing widgets
+  # It has been copied from: https://github.com/nicoulaj/zsh-syntax-highlighting:
+
+  # Load ZSH module zsh/zleparameter, needed to override user defined widgets.
+  zmodload zsh/zleparameter 2>/dev/null || {
+    echo 'zsh-syntax-highlighting: failed loading zsh/zleparameter, exiting.' >&2
+    return -1
+  }
+
+  # Override ZLE widgets to make them invoke _zsh_highlight.
+  for event in ${${(f)"$(zle -la)"}:#(_*|orig-*|.run-help|.which-command)}; do
+    if [[ "$widgets[$event]" == completion:* ]]; then
+      eval "zle -C orig-$event ${${${widgets[$event]}#*:}/:/ } ; $event() { builtin zle orig-$event && _zsh_highlight } ; zle -N $event"
+    else
+      case $event in
+        accept-and-menu-complete)
+          eval "$event() { builtin zle .$event && _zsh_highlight } ; zle -N $event"
+          ;;
+        .*)
+          clean_event=$event[2,${#event}] # Remove the leading dot in the event name
+          case ${widgets[$clean_event]-} in
+            (completion|user):*)
+              ;;
+            *)
+              eval "$clean_event() { builtin zle $event && _zsh_highlight } ; zle -N $clean_event"
+              ;;
+          esac
+          ;;
+        *)
+          ;;
+      esac
+    fi
+  done
+  unset event clean_event
+
+  # define _zsh_highlight() as "provide no highlighting"
+  function _zsh_highlight() {
+    region_highlight=()
+  }
+fi
+
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='bg=magenta,fg=white,bold'
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND='bg=red,fg=white,bold'
 HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS='i' # see "Globbing Flags" in zshexpn(1)
@@ -102,7 +158,7 @@ history-substring-search-highlight() {
 
   # highlight $BUFFER using zsh-syntax-highlighting plugin
   # https://github.com/nicoulaj/zsh-syntax-highlighting
-  if [[ $+functions[_zsh_highlight] -eq 1 ]]; then
+  if [[ $#ZSH_HIGHLIGHT_STYLES -gt 0 ]]; then 
     _zsh_highlight
   fi
 
@@ -126,24 +182,29 @@ history-substring-search-end() {
   [[ $history_substring_search_move_cursor_eol == true ]] && CURSOR=${#BUFFER}
 
   # for debugging purposes:
-  #zle -R "mn: "$history_substring_search_match_number" m#: "${#history_substring_search_matches}
-  #read -k -t 200 && zle -U $REPLY
+  # zle -R "mn: "$history_substring_search_match_number" m#: "${#history_substring_search_matches}
+  # read -k -t 200 && zle -U $REPLY
 
+  # suppress any errors:
   true
 }
 
 history-substring-search-backward() {
   history-substring-search-begin
+  # Check if the UP arrow was pressed to move cursor within a multi-line buffer
+  # This amounts to three tests:  
+  # 1. $#buflines -gt 1 && $#xlbuflines
+  # 2. $CURSOR -ne $#BUFFER
+  # 3. check if we are on the first line of the current multi-line buffer
+  #    If so, pressing UP would amount to leaving the multi-line buffer
+  # We test the 3. by adding an extra "x" to $LBUFFER, which makes sure that xlbuflines is always
+  # equal to the number of lines until $CURSOR (including the line with the cursor on it)
 
-  # check if the UP arrow was pressed to move cursor in multi-line buffer:
-  # First create XLBUFFER (i.e. Xtended LBUFFER). Add an X before the cursor,
-  # so that we can later detect whether there is a newline immediately before
-  # the current cursor.
   buflines=(${(f)BUFFER})
   local XLBUFFER=$LBUFFER"x"
   xlbuflines=(${(f)XLBUFFER})
 
-  if [[ $#buflines -gt 1 && $#xlbuflines -ne 1 && $#BUFFER -ne $#LBUFFER ]]; then
+  if [[ $#buflines -gt 1 && $CURSOR -ne $#BUFFER && $#xlbuflines -ne 1 ]]; then
     zle up-line-or-history
     history_substring_search_move_cursor_eol=false
   else
@@ -177,15 +238,19 @@ history-substring-search-backward() {
 history-substring-search-forward() {
   history-substring-search-begin
 
-  # check if the DOWN arrow was pressed to move cursor in multi-line buffer:
-  # First create XRBUFFER (i.e. Xtended RBUFFER). Add an X after the cursor,
-  # so that we can later detect whether there is a newline immediately behind
-  # the current cursor.
+  # Check if the DOWN arrow was pressed to move cursor within a multi-line buffer
+  # This amounts to three tests:  
+  # 1. $#buflines -gt 1 && $#xlbuflines
+  # 2. $CURSOR -ne $#BUFFER
+  # 3. check if we are on the last line of the current multi-line buffer
+  #    If so, pressing DOWN would amount to leaving the multi-line buffer
+  # We test the 3. by adding an extra "x" to $RBUFFER, which makes sure that xrbuflines is always
+  # equal to the number of lines from $CURSOR (including the line with the cursor on it)
   buflines=(${(f)BUFFER})
   local XRBUFFER="x"$RBUFFER
   xrbuflines=(${(f)XRBUFFER})
 
-  if [[ $#buflines -gt 1 && $#xrbuflines -ne 1 && $#BUFFER -ne $#LBUFFER ]]; then
+  if [[ $#buflines -gt 1 && $CURSOR -ne $#BUFFER && $#xrbuflines -ne 1 ]]; then
     zle down-line-or-history
     history_substring_search_move_cursor_eol=false
   else
@@ -227,3 +292,4 @@ bindkey '\e[B' history-substring-search-forward
 
 # -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=zsh sw=2 ts=2 et
+
