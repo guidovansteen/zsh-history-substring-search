@@ -111,6 +111,11 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
     fi
   done
   unset event clean_event
+
+  # define _zsh_highlight() as "provide no highlighting"
+  function _zsh_highlight() {
+    region_highlight=()
+  }
 fi
 
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='bg=magenta,fg=white,bold'
