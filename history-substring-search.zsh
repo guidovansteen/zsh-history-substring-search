@@ -155,6 +155,26 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
   unset event clean_event
 
   #-------------->8------------------->8------------------->8----------------#
+
+  # redefine forward-char, backward-char, up-line-or-history and down-line-or-history, 
+  # so that they do not remove any previously applied highlighting
+
+  function forward-char () { 
+    zle .forward-char
+  }
+
+  function backward-char () { 
+    zle .backward-char
+  }
+
+  function up-line-or-history () { 
+    zle .up-line-or-history
+  }
+
+  function down-line-or-history () {
+    zle .down-line-or-history
+  }
+
 fi
 
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='bg=magenta,fg=white,bold'
