@@ -111,11 +111,6 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
     fi
   done
   unset event clean_event
-
-  # define _zsh_highlight() as "provide no highlighting"
-  function _zsh_highlight() {
-    region_highlight=()
-  }
 fi
 
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='bg=magenta,fg=white,bold'
@@ -193,11 +188,11 @@ history-substring-search-backward() {
   history-substring-search-begin
   # Check if the UP arrow was pressed to move cursor within a multi-line buffer
   # This amounts to three tests:  
-  # 1. $#buflines -gt 1 && $#xlbuflines
+  # 1. $#buflines -gt 1
   # 2. $CURSOR -ne $#BUFFER
   # 3. check if we are on the first line of the current multi-line buffer
   #    If so, pressing UP would amount to leaving the multi-line buffer
-  # We test the 3. by adding an extra "x" to $LBUFFER, which makes sure that xlbuflines is always
+  # We test 3. by adding an extra "x" to $LBUFFER, which makes sure that xlbuflines is always
   # equal to the number of lines until $CURSOR (including the line with the cursor on it)
 
   buflines=(${(f)BUFFER})
@@ -240,11 +235,11 @@ history-substring-search-forward() {
 
   # Check if the DOWN arrow was pressed to move cursor within a multi-line buffer
   # This amounts to three tests:  
-  # 1. $#buflines -gt 1 && $#xlbuflines
+  # 1. $#buflines -gt 1
   # 2. $CURSOR -ne $#BUFFER
   # 3. check if we are on the last line of the current multi-line buffer
   #    If so, pressing DOWN would amount to leaving the multi-line buffer
-  # We test the 3. by adding an extra "x" to $RBUFFER, which makes sure that xrbuflines is always
+  # We test 3. by adding an extra "x" to $RBUFFER, which makes sure that xrbuflines is always
   # equal to the number of lines from $CURSOR (including the line with the cursor on it)
   buflines=(${(f)BUFFER})
   local XRBUFFER="x"$RBUFFER
