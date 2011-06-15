@@ -62,11 +62,23 @@
 setopt extendedglob
 zmodload -F zsh/parameter
 
+# If _zsh_highlight-zle-buffer() exists, it means that the old 
+# version of zsh-syntax-highlighting has been loaded.
+
+if [[ $#functions[_zsh_highlight-zle-buffer] -gt 0 ]]; then
+
+  # In that case we make it callable as _zsh_highlight()
+  function _zsh_highlight() {
+    _zsh_highlight-zle-buffer
+  }
+fi 
+
 # We have to "override" some keys and widgets, unless
 # the zsh-syntax-highlighting plugin has been loaded:
 #
 # https://github.com/nicoulaj/zsh-syntax-highlighting
 #
+
 if [[ $#functions[_zsh_highlight] -eq 0 ]]; then
 
   # dummy implementation of _zsh_highlight()
@@ -207,6 +219,7 @@ history-substring-search-highlight() {
     : ${(S)BUFFER##(#m$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)($history_substring_search_query##)}
     let "history_substring_search_query_mbegin = $MBEGIN - 1"
     let "history_substring_search_query_mend = $history_substring_search_query_mbegin + $#history_substring_search_query"
+    # this is slightly more informative than highlighting that fish performs
     region_highlight+=("$history_substring_search_query_mbegin $history_substring_search_query_mend $1")
   fi
 }
