@@ -219,7 +219,6 @@ history-substring-search-highlight() {
     : ${(S)BUFFER##(#m$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)($history_substring_search_query##)}
     let "history_substring_search_query_mbegin = $MBEGIN - 1"
     let "history_substring_search_query_mend = $history_substring_search_query_mbegin + $#history_substring_search_query"
-    # this is slightly more informative than highlighting that fish performs
     region_highlight+=("$history_substring_search_query_mbegin $history_substring_search_query_mend $1")
   fi
 }
