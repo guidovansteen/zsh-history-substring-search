@@ -90,7 +90,7 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
   # https://github.com/nicoulaj/zsh-syntax-highlighting/blob/
   # bb7fcb79fad797a40077bebaf6f4e4a93c9d8163/zsh-syntax-highlighting.zsh#L121
   #
-  #--------------8<-------------------8<-------------------8<----------------#
+  #--------------8<-------------------8<-------------------8<-----------------
   #
   # Copyright (c) 2010-2011 zsh-syntax-highlighting contributors
   # All rights reserved.
@@ -137,10 +137,12 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
         accept-and-menu-complete)
           eval "$event() { builtin zle .$event && _zsh_highlight } ; zle -N $event"
           ;;
-        # The following widgets should NOT remove any previously applied highlighting
-        # Therefore we do not remap them
-        (.forward-char|.backward-char|.up-line-or-history|.down-line-or-history))
+
+        # The following widgets should NOT remove any previously
+        # applied highlighting.  Therefore we do not remap them.
+        .forward-char|.backward-char|.up-line-or-history|.down-line-or-history)
           ;;
+
         .*)
           clean_event=$event[2,${#event}] # Remove the leading dot in the event name
           case ${widgets[$clean_event]-} in
@@ -157,9 +159,7 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
     fi
   done
   unset event clean_event
-
-  #-------------->8------------------->8------------------->8----------------#
-
+  #-------------->8------------------->8------------------->8-----------------
 fi
 
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='bg=magenta,fg=white,bold'
