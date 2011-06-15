@@ -67,7 +67,7 @@ zmodload -F zsh/parameter
 #
 # https://github.com/nicoulaj/zsh-syntax-highlighting
 #
-if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
+if [[ $#functions[_zsh_highlight] -eq 0 ]]; then
 
   # dummy implementation of _zsh_highlight()
   # that simply removes existing highlights
@@ -139,7 +139,7 @@ if [[ $#ZSH_HIGHLIGHT_STYLES -eq 0 ]]; then
           ;;
 
         # The following widgets should NOT remove any previously
-        # applied highlighting.  Therefore we do not remap them.
+        # applied highlighting. Therefore we do not remap them.
         .forward-char|.backward-char|.up-line-or-history|.down-line-or-history)
           ;;
 
@@ -205,9 +205,9 @@ history-substring-search-highlight() {
     # which indicates the end position of the first occurrence of
     # $history_substring_search_query_escaped in $BUFFER
     : ${(S)BUFFER##(#m$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)($history_substring_search_query##)}
-    let "history_substring_search_query_mbegin = $MEND - $#history_substring_search_query"
-    # this is slightly more informative than highlighting that fish performs
-    region_highlight+=("$history_substring_search_query_mbegin $MEND $1")
+    let "history_substring_search_query_mbegin = $MBEGIN - 1"
+    let "history_substring_search_query_mend = $history_substring_search_query_mbegin + $#history_substring_search_query"
+    region_highlight+=("$history_substring_search_query_mbegin $history_substring_search_query_mend $1")
   fi
 }
 
