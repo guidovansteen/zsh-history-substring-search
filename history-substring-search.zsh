@@ -229,7 +229,7 @@ _history-substring-search-end() {
 history-substring-search-backward() {
   _history-substring-search-begin
 
-  # When searching without a search query history-substring-search-backward should behave like 
+  # When searching without a search query history-substring-search-backward should behave like
   # up-history. Apart from this such a search should end with an empty BUFFER like in Fish.
   if [[ $_history_substring_search_query == "" ]]; then
 
@@ -240,8 +240,8 @@ history-substring-search-backward() {
       [[ $#_history_substring_search_last_entry_in_history -eq 0 ]] && _history_substring_search_last_entry_in_history=$BUFFER
       BUFFER=""
     fi
-  else 
 
+  else
     # Check if the UP arrow was pressed to move the cursor within a multi-line
     # buffer.  This amounts to three tests:
     #
@@ -295,9 +295,9 @@ history-substring-search-backward() {
 history-substring-search-forward() {
   _history-substring-search-begin
 
-  # When searching without a search query history-substring-search-forward should behave like 
+  # When searching without a search query history-substring-search-forward should behave like
   # down-history. Apart from this such a search should end with an empty BUFFER like in Fish.
-  if [[ $_history_substring_search_query == "" ]]; then 
+  if [[ $_history_substring_search_query == "" ]]; then
 
     # We are not at the last history entry
     if [[ $#_history_substring_search_last_entry_in_history -eq 0 ]]; then
@@ -306,9 +306,9 @@ history-substring-search-forward() {
       BUFFER=$_history_substring_search_last_entry_in_history
       CURSOR=$#BUFFER
       _history_substring_search_last_entry_in_history=""
-    fi 
-  else 
+    fi
 
+  else
     # Check if the DOWN arrow was pressed to move the cursor within a multi-line
     # buffer.  This amounts to three tests:
     #
