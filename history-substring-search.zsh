@@ -283,8 +283,8 @@ _history-substring-search-highlight() {
     # of _history_substring_search_query_escaped in $BUFFER.
     #
     : ${(S)BUFFER##(#m$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)($_history_substring_search_query##)}
-    local begin=$(( MBEGIN - 1 ))
-    local end=$(( MBEGIN + $#_history_substring_search_query ))
+    local begin=$(( $MBEGIN - 1 ))
+    local end=$(( $begin + $#_history_substring_search_query ))
     region_highlight+=("$begin $end $1")
   fi
 }
