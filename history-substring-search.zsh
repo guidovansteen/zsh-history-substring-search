@@ -349,28 +349,29 @@ _history-substring-search-down-buffer() {
 
 _history-substring-search-up-history() {
   if [[ -z $_history_substring_search_query ]]; then
-		if [[ $HISTNO -gt 1 ]]; then 
-			zle up-history
-		else 
-			BUFFER=""
-		fi
+    if [[ $HISTNO -gt 1 ]]; then
+      zle up-history
+    else
+      BUFFER=""
+    fi
     return true
-  fi 
+  fi
 
-	false
+  false
 }
 
 _history-substring-search-down-history() {
   if [[ -z $_history_substring_search_query ]]; then
-		if [[ $HISTNO -eq 1 && $BUFFER == "" ]]; then 
+    if [[ $HISTNO -eq 1 && $BUFFER == "" ]]; then
 
-			# down-history would go too far here, because we have not decreased $HISTNO 
+      # down-history would go too far here, because we have not decreased $HISTNO
       # after we emptied the buffer in _history-substring-search-up-history
-      # So instead we call: 
-			BUFFER=$(history -n 1 1) 
-		else 
-			zle down-history
-		fi
+      # So instead we call:
+      BUFFER=$(history -n 1 1)
+      CURSOR=$#BUFFER
+    else
+      zle down-history
+    fi
     return true
   fi
 
