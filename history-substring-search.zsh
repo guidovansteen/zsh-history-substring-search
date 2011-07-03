@@ -318,32 +318,12 @@ function _history-substring-search-begin() {
     _history_substring_search_matches_count_plus=$(( _history_substring_search_matches_count + 1 ))
     _history_substring_search_matches_count_sans=$(( _history_substring_search_matches_count - 1 ))
 
-    # If $_history_substring_search_match_index is equal to $_history_substring_search_matches_count_plus,
-    # this indicates that we are beyond the beginning of $_history_substring_search_matches.
     #
-    # If $_history_substring_search_match_index is equal to 0,
-    # this indicates that we are beyond the end of $_history_substring_search_matches.
+    # initial value of $_history_substring_search_match_index, which
+    # can only be decreased by the history-substring-search-* widgets.
     #
-    # If we have initially pressed "up" we have to initialize $_history_substring_search_match_index to
-    # $_history_substring_search_matches_count_plus so that it will be decreased to
-    # $_history_substring_search_matches_count.
-    #
-    # If we have initially pressed "down" we have to initialize $_history_substring_search_match_index to
-    # $_history_substring_search_matches_count so that it will be increased to
-    # $_history_substring_search_matches_count_plus.
-
-    # "down" can be deleted from $WIDGET. So, we have pressed "down".
-    #
-    if [[ "${WIDGET/down/""}" != "$WIDGET" ]]; then
-       _history_substring_search_match_index=$_history_substring_search_matches_count
-    # "down" cannot be deleted from $WIDGET. So, we have pressed "up".
-    #
-    else
-      _history_substring_search_match_index=$_history_substring_search_matches_count_plus
-    fi
-
+    _history_substring_search_match_index=$_history_substring_search_matches_count_plus
   fi
-
 }
 
 function _history-substring-search-end() {
@@ -485,17 +465,13 @@ function _history-substring-search-up-search() {
   _history_substring_search_move_cursor_eol=true
 
   #
-  # Highlight matches during history-substring-up-search:
+  # Highlight matches during a history-substring-search:
   #
-  # The following constants have been initialized in
-  # _history-substring-search-up/down-search():
-  #
-  # $_history_substring_search_matches: the current list of matches
-  # $_history_substring_search_matches_count: the current number of matches
-  # $_history_substring_search_matches_count_plus: the current number of matches + 1
-  # $_history_substring_search_matches_count_sans: the current number of matches - 1
-  #
-  # $_history_substring_search_match_index is the index of the current match
+  # * $_history_substring_search_matches: the current list of matches
+  # * $_history_substring_search_matches_count: the current number of matches
+  # * $_history_substring_search_matches_count_plus: the current number of matches + 1
+  # * $_history_substring_search_matches_count_sans: the current number of matches - 1
+  # * $_history_substring_search_match_index: the number of the current match
   #
   # The range of values that $_history_substring_search_match_index
   # can take is: [0, $_history_substring_search_matches_count_plus].
@@ -504,12 +480,8 @@ function _history-substring-search-up-search() {
   # $_history_substring_search_matches_count_plus indicates that we
   # are beyond the beginning of $_history_substring_search_matches.
   #
-  # In _history-substring-search-up-search() the initial value of
-  # $_history_substring_search_match_index is
+  # The initial value of $_history_substring_search_match_index is
   # $_history_substring_search_matches_count_plus.
-  # This value is set in _history-substring-search-begin().
-  # _history-substring-search-up-search() will initially decrease
-  # it to $_history_substring_search_matches_count.
   #
   if [[ $_history_substring_search_match_index -ge 2 ]]; then
     #
@@ -566,17 +538,13 @@ function _history-substring-search-down-search() {
   _history_substring_search_move_cursor_eol=true
 
   #
-  # Highlight matches during history-substring-up-search:
-  #
-  # The following constants have been initialized in
-  # _history-substring-search-up/down-search():
+  # Highlight matches during a history-substring-search:
   #
   # $_history_substring_search_matches: the current list of matches
   # $_history_substring_search_matches_count: the current number of matches
   # $_history_substring_search_matches_count_plus: the current number of matches + 1
   # $_history_substring_search_matches_count_sans: the current number of matches - 1
-  #
-  # $_history_substring_search_match_index is the index of the current match
+  # $_history_substring_search_match_index: the number of the current match
   #
   # The range of values that $_history_substring_search_match_index
   # can take is: [0, $_history_substring_search_matches_count_plus].
@@ -585,15 +553,21 @@ function _history-substring-search-down-search() {
   # $_history_substring_search_matches_count_plus indicates that we
   # are beyond the beginning of $_history_substring_search_matches.
   #
-  # In _history-substring-search-down-search() the initial value of
-  # $_history_substring_search_match_index is
-  # $_history_substring_search_matches_count.
-  # This value is set in _history-substring-search-begin().
-  # _history-substring-search-down-search() will initially increase
-  # it to $_history_substring_search_matches_count_plus.
+  # The initial value of $_history_substring_search_match_index is
+  # $_history_substring_search_matches_count_plus.
   #
+  if [[ $_history_substring_search_match_index -eq $_history_substring_search_matches_count_plus ]]; then
+    #
+    # DOWN was pressed immediately. $_history_substring_search_match_index is
+    # still equal to $_history_substring_search_match_number_plus.
+    # However, there is no highlighting yet:
+    #
+    # 1. We have to use $HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND
+    #    to highlight the current buffer.
+    #
+    _history_substring_search_query_highlight=$HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND
 
-  if [[ $_history_substring_search_match_index -le $_history_substring_search_matches_count_sans ]]; then
+  elif [[ $_history_substring_search_match_index -le $_history_substring_search_matches_count_sans ]]; then
     #
     # Highlight the next match:
     #
